@@ -224,7 +224,8 @@ void TM_NRF24L01_InitPins(void) {
 }
 
 uint8_t TM_NRF24L01_Init(uint8_t channel, uint8_t payload_size) {
-       
+        
+        uint8_t tmp;
 	/* Initialize CE and CSN pins */
 	TM_NRF24L01_InitPins();
 	
@@ -264,6 +265,7 @@ uint8_t TM_NRF24L01_Init(uint8_t channel, uint8_t payload_size) {
 	
 	/* Enable auto-acknowledgment for all pipes */
 	TM_NRF24L01_WriteRegister(NRF24L01_REG_EN_AA, 0x3F);
+        tmp = TM_NRF24L01_ReadRegister(NRF24L01_REG_EN_AA);
 	
 	/* Enable RX addresses */
 	TM_NRF24L01_WriteRegister(NRF24L01_REG_EN_RXADDR, 0x3F);

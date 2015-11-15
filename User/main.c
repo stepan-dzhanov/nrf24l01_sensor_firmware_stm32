@@ -31,21 +31,23 @@
 
     
 /* My address */
-uint8_t MyAddress[] = {
+/* Receiver address */
+uint8_t TxAddress[] = {
     0xE7,
     0xE7,
     0xE7,
     0xE7,
     0xE7
 };
-/* Receiver address */
-uint8_t TxAddress[] = {
+/* My address */
+uint8_t MyAddress[] = {
     0x7E,
     0x7E,
     0x7E,
     0x7E,
     0x7E
 };
+ 
  
 uint8_t dataOut[32], dataIn[32];
 
@@ -75,42 +77,25 @@ int main(void)  {
     /* Reset counter */
     ResetTimer();
     while (1) {
-        /* Every 2 seconds */
-        if (GetTimer() > 2) {
-            /* Fill data with something */
-            sprintf((char *)dataOut, "abcdefghijklmnoszxABCDEFCBDA");
-            /* Display on USART */
-         
-            /* Transmit data, goes automatically to TX mode */
-            TM_NRF24L01_Transmit(dataOut);
+        /* If data is ready on NRF24L01+ */
+        if (TM_NRF24L01_DataReady()) {
+            /* Get data from NRF24L01+ */
+            TM_NRF24L01_GetData(dataIn);
             
-            /* Turn on led to indicate sending */
-          
-            /* Wait for data to be sent */
+            /* Send it back, automatically goes to TX mode */
+            TM_NRF24L01_Transmit(dataIn);
+            
+            
             do {
                 transmissionStatus = TM_NRF24L01_GetTransmissionStatus();
             } while (transmissionStatus == TM_NRF24L01_Transmit_Status_Sending);
-            /* Turn off led */
-           
+            /* Send done */
+          
             
-            /* Go back to RX mode */
-            TM_NRF24L01_PowerUpRx();
-            ResetTimer();
-            /* Wait received data, wait max 100ms, if time is larger, then data were probably lost */
-            while (!TM_NRF24L01_DataReady() && GetTimer() < 1);
-            
-           
-            /* Get data from NRF2L01+ */
-            TM_NRF24L01_GetData(dataIn);
-            
-            /* Check transmit status */
-            if (transmissionStatus == TM_NRF24L01_Transmit_Status_Ok) {
-               ;
-            } else if (transmissionStatus == TM_NRF24L01_Transmit_Status_Lost) {
-              ;
-            } 
-            ResetTimer();
+            /* Go back to RX Mode */
+            TM_NRF24L01_PowerUpRx();        
         }
+       
     }
  
   
