@@ -78,7 +78,7 @@ int main(void)  {
         /* Every 2 seconds */
         if (GetTimer() > 2) {
             /* Fill data with something */
-            sprintf((char *)dataOut, "abcdefghijklmnoszxABCDEFCBDA");
+            sprintf((char *)dataOut, "arm");
             /* Display on USART */
          
             /* Transmit data, goes automatically to TX mode */
