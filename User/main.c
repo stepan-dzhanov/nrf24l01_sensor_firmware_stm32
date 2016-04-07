@@ -57,15 +57,15 @@ int main(void)  {
         /* Capture error */ 
          while (1);
      }
-    
+     TM_GPIO_Init(GPIOD, GPIO_PIN_14|GPIO_PIN_12, TM_GPIO_Mode_OUT, TM_GPIO_OType_PP, TM_GPIO_PuPd_UP, TM_GPIO_Speed_Low);
   
     /* Initialize NRF24L01+ on channel 15 and 32bytes of payload */
     /* By default 2Mbps data rate and 0dBm output power */
     /* NRF24L01 goes to RX mode by default */
-    TM_NRF24L01_Init(15, 32);
+    TM_NRF24L01_Init(19, 32);
     
     /* Set 2MBps data rate and -18dBm output power */
-    TM_NRF24L01_SetRF(TM_NRF24L01_DataRate_2M, TM_NRF24L01_OutputPower_M18dBm);
+    TM_NRF24L01_SetRF(TM_NRF24L01_DataRate_2M, TM_NRF24L01_OutputPower_0dBm);
     
     /* Set my address, 5 bytes */
     TM_NRF24L01_SetMyAddress(MyAddress);
@@ -73,49 +73,89 @@ int main(void)  {
     TM_NRF24L01_SetTxAddress(TxAddress);
     
     /* Reset counter */
-    ResetTimer();
+   
+   
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     while (1) {
         /* Every 2 seconds */
-        if (GetTimer() > 2) {
+        while(GetTimer()<1000);
+        ResetTimer();
             /* Fill data with something */
-            sprintf((char *)dataOut, "arm");
+            sprintf((char *)dataOut, "iam");
+            dataOut[3] = 2;
+            dataOut[4] = 2;
+              dataOut[5] = 'B';
             /* Display on USART */
          
             /* Transmit data, goes automatically to TX mode */
+            TM_GPIO_SetPinHigh(GPIOD, GPIO_PIN_12);
             TM_NRF24L01_Transmit(dataOut);
             
             /* Turn on led to indicate sending */
           
             /* Wait for data to be sent */
             do {
-                transmissionStatus = TM_NRF24L01_GetTransmissionStatus();
+               transmissionStatus = TM_NRF24L01_GetTransmissionStatus();
             } while (transmissionStatus == TM_NRF24L01_Transmit_Status_Sending);
             /* Turn off led */
-           
+            TM_GPIO_SetPinLow(GPIOD, GPIO_PIN_12);
+            
             
             /* Go back to RX mode */
             TM_NRF24L01_PowerUpRx();
-            ResetTimer();
+            
+             while(GetTimer()<100);
             /* Wait received data, wait max 100ms, if time is larger, then data were probably lost */
-            while (!TM_NRF24L01_DataReady() && GetTimer() < 1);
+            if(TM_NRF24L01_DataReady()){
+              
+            
             
            
-            /* Get data from NRF2L01+ */
-            TM_NRF24L01_GetData(dataIn);
+                /* Get data from NRF2L01+ */
+                TM_NRF24L01_GetData(dataIn);
+                 sprintf((char *)dataOut, "tst");
+                if(!memcmp(&dataIn[1],&dataOut,3)){
+                 sprintf((char *)dataOut, "OK");
+                 TM_NRF24L01_Transmit(dataOut);
             
-            /* Check transmit status */
-            if (transmissionStatus == TM_NRF24L01_Transmit_Status_Ok) {
-               ;
-            } else if (transmissionStatus == TM_NRF24L01_Transmit_Status_Lost) {
-              ;
-            } 
-            ResetTimer();
-        }
-    }
+            /* Turn on led to indicate sending */
+          
+            /* Wait for data to be sent */
+            do {
+               transmissionStatus = TM_NRF24L01_GetTransmissionStatus();
+            } while (transmissionStatus == TM_NRF24L01_Transmit_Status_Sending);
+                 
+                 
+                 
+                
+                }
+                
+                /* Check transmit status */
+                if (transmissionStatus == TM_NRF24L01_Transmit_Status_Ok) {
+                   ;
+                } else if (transmissionStatus == TM_NRF24L01_Transmit_Status_Lost) {
+                  ;
+                } 
+                
+        
+        
+            }
+    
  
   
    
-   
+  
+    }
  
    
             
