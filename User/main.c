@@ -22,151 +22,90 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f4xx.h"
 #include "timer.h" 
-#include "tm_stm32f4_nrf24l01.h"
+#include "rfm12b.h"
 
     
 #include <string.h>
 #include <stdio.h>
 
 
-    
-/* My address */
-uint8_t MyAddress[] = {
-    0xE7,
-    0xE7,
-    0xE7,
-    0xE7,
-    0xE7
-};
-/* Receiver address */
-uint8_t TxAddress[] = {
-    0x7E,
-    0x7E,
-    0x7E,
-    0x7E,
-    0x7E
-};
+
  
 uint8_t dataOut[32], dataIn[32];
 
 int main(void)  {
-    TM_NRF24L01_Transmit_Status_t transmissionStatus;
-    char str[40];
+     
+     uint8_t  ChkSum;
+     uint16_t status;
+ 
     
      if (SysTick_Config(SystemCoreClock / 1000))     { 
         /* Capture error */ 
          while (1);
      }
      TM_GPIO_Init(GPIOD, GPIO_PIN_14|GPIO_PIN_12, TM_GPIO_Mode_OUT, TM_GPIO_OType_PP, TM_GPIO_PuPd_UP, TM_GPIO_Speed_Low);
-  
-    /* Initialize NRF24L01+ on channel 15 and 32bytes of payload */
-    /* By default 2Mbps data rate and 0dBm output power */
-    /* NRF24L01 goes to RX mode by default */
-    TM_NRF24L01_Init(19, 32);
-    
-    /* Set 2MBps data rate and -18dBm output power */
-    TM_NRF24L01_SetRF(TM_NRF24L01_DataRate_2M, TM_NRF24L01_OutputPower_0dBm);
-    
-    /* Set my address, 5 bytes */
-    TM_NRF24L01_SetMyAddress(MyAddress);
-    /* Set TX address, 5 bytes */
-    TM_NRF24L01_SetTxAddress(TxAddress);
-    
-    /* Reset counter */
-   
-   
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    while (1) {
-        /* Every 2 seconds */
-        while(GetTimer()<1000);
-        ResetTimer();
-            /* Fill data with something */
-            sprintf((char *)dataOut, "iam");
-            dataOut[3] = 2;
-            dataOut[4] = 2;
-              dataOut[5] = 'B';
-            /* Display on USART */
-         
-            /* Transmit data, goes automatically to TX mode */
-            TM_GPIO_SetPinHigh(GPIOD, GPIO_PIN_12);
-            TM_NRF24L01_Transmit(dataOut);
-            
-            /* Turn on led to indicate sending */
-          
-            /* Wait for data to be sent */
-            do {
-               transmissionStatus = TM_NRF24L01_GetTransmissionStatus();
-            } while (transmissionStatus == TM_NRF24L01_Transmit_Status_Sending);
-            /* Turn off led */
-            TM_GPIO_SetPinLow(GPIOD, GPIO_PIN_12);
-            
-            
-            /* Go back to RX mode */
-            TM_NRF24L01_PowerUpRx();
-            
-             while(GetTimer()<100);
-            /* Wait received data, wait max 100ms, if time is larger, then data were probably lost */
-            if(TM_NRF24L01_DataReady()){
+     
+     
+      RFM12B_Init();
+     
+      RFM12B_WriteCMD(0x0000);//read status register
+      RFM12B_WriteCMD(0x8239);//!er,!ebb,ET,ES,EX,!eb,!ew,DC
+     
+      ChkSum=0;
+      RFM12B_WriteFSK(0xAA);//PREAMBLE
+      RFM12B_WriteFSK(0xAA);//PREAMBLE
+      RFM12B_WriteFSK(0xAA);//PREAMBLE
+      RFM12B_WriteFSK(0x2D);//SYNC HI BYTE
+      RFM12B_WriteFSK(0xD4);//SYNC LOW BYTE
+      RFM12B_WriteFSK(0x30);//DATA BYTE 0
+      ChkSum+=0x30;
+      RFM12B_WriteFSK(0x31);//DATA BYTE 1
+      ChkSum+=0x31;
+      RFM12B_WriteFSK(0x32);
+      ChkSum+=0x32;
+      RFM12B_WriteFSK(0x33);
+      ChkSum+=0x33;
+      RFM12B_WriteFSK(0x34);
+      ChkSum+=0x34;
+      RFM12B_WriteFSK(0x35);
+      ChkSum+=0x35;
+      RFM12B_WriteFSK(0x36);
+      ChkSum+=0x36;
+      RFM12B_WriteFSK(0x37);
+      ChkSum+=0x37;
+      RFM12B_WriteFSK(0x38);
+      ChkSum+=0x38;
+      RFM12B_WriteFSK(0x39);
+      ChkSum+=0x39;
+      RFM12B_WriteFSK(0x3A);
+      ChkSum+=0x3A;
+      RFM12B_WriteFSK(0x3B);
+      ChkSum+=0x3B;
+      RFM12B_WriteFSK(0x3C);
+      ChkSum+=0x3C;
+      RFM12B_WriteFSK(0x3D);
+      ChkSum+=0x3D;
+      RFM12B_WriteFSK(0x3E);
+      ChkSum+=0x3E;
+      RFM12B_WriteFSK(0x3F); //DATA BYTE 15
+      ChkSum+=0x3F;
+      RFM12B_WriteFSK(ChkSum); //send chek sum
+      RFM12B_WriteFSK(0xAA);//DUMMY BYTE
+      RFM12B_WriteFSK(0xAA);//DUMMY BYTE
+      RFM12B_WriteFSK(0xAA);//DUMMY BYTE
+     // while (1){
+     // status = RFM12B_WriteCMD(0x0000);
+      
+    //  }
+      
+      
+      
+      ResetTimer();
+      while(GetTimer()<1000);
+      
+      RFM12B_WriteCMD(0x8201);
+      while(1);
               
-            
-            
-           
-                /* Get data from NRF2L01+ */
-                TM_NRF24L01_GetData(dataIn);
-                 sprintf((char *)dataOut, "tst");
-                if(!memcmp(&dataIn[1],&dataOut,3)){
-                 sprintf((char *)dataOut, "OK");
-                 TM_NRF24L01_Transmit(dataOut);
-            
-            /* Turn on led to indicate sending */
-          
-            /* Wait for data to be sent */
-            do {
-               transmissionStatus = TM_NRF24L01_GetTransmissionStatus();
-            } while (transmissionStatus == TM_NRF24L01_Transmit_Status_Sending);
-                 
-                 
-                 
-                
-                }
-                
-                /* Check transmit status */
-                if (transmissionStatus == TM_NRF24L01_Transmit_Status_Ok) {
-                   ;
-                } else if (transmissionStatus == TM_NRF24L01_Transmit_Status_Lost) {
-                  ;
-                } 
-                
-        
-        
-            }
-    
- 
-  
-   
-  
-    }
- 
-   
-            
-            
-            
-       
-        
-        
-        
-        
-        
 }
 
 

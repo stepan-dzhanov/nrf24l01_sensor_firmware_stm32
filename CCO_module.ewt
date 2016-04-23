@@ -2212,6 +2212,9 @@
       <name>$PROJ_DIR$\User\protocol.c</name>
     </file>
     <file>
+      <name>$PROJ_DIR$\User\rfm12b.c</name>
+    </file>
+    <file>
       <name>$PROJ_DIR$\User\stm32f4xx_it.c</name>
     </file>
     <file>
