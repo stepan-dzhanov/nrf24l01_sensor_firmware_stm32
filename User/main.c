@@ -45,13 +45,14 @@ int main(void)  {
      }
      TM_GPIO_Init(GPIOD, GPIO_PIN_14|GPIO_PIN_12, TM_GPIO_Mode_OUT, TM_GPIO_OType_PP, TM_GPIO_PuPd_UP, TM_GPIO_Speed_Low);
      
-     
+      
       RFM12B_Init();
-     
-      RFM12B_WriteCMD(0x0000);//read status register
-      RFM12B_WriteCMD(0x8239);//!er,!ebb,ET,ES,EX,!eb,!ew,DC
-     
-      ChkSum=0;
+      status = RFM12B_WriteCMD(0x0000);
+      RFM12B_WriteCMD(0xCA81);//read status register
+      RFM12B_WriteCMD(0xCA83);//!er,!ebb,ET,ES,EX,!eb,!ew,DC
+      
+    /*RFM12B_WriteCMD(0x0000);
+      RFM12B_WriteCMD(0x8239);
       RFM12B_WriteFSK(0xAA);//PREAMBLE
       RFM12B_WriteFSK(0xAA);//PREAMBLE
       RFM12B_WriteFSK(0xAA);//PREAMBLE
@@ -92,21 +93,28 @@ int main(void)  {
       RFM12B_WriteFSK(ChkSum); //send chek sum
       RFM12B_WriteFSK(0xAA);//DUMMY BYTE
       RFM12B_WriteFSK(0xAA);//DUMMY BYTE
-      RFM12B_WriteFSK(0xAA);//DUMMY BYTE
-     // while (1){
-     // status = RFM12B_WriteCMD(0x0000);
-      
-    //  }
+      RFM12B_WriteFSK(0xAA);//DUMMY BYTE*/
       
       
       
-      ResetTimer();
-      while(GetTimer()<1000);
       
-      RFM12B_WriteCMD(0x8201);
-      while(1);
+      
+      while(1) {
+        status = RFM12B_WriteCMD(0x0000);
+        if(status&0x8000 ){
+          status = RFM12B_WriteCMD(0xB000);
+          ChkSum = 0;
+          
+        }
+      }
+      
+}     
+    
+      
+  //    RFM12B_WriteCMD(0x8201);
+    //  while(1);
               
-}
+//}
 
 
 

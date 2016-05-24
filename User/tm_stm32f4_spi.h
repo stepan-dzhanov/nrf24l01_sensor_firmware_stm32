@@ -244,7 +244,7 @@ typedef enum {
 //----- SPI2 options start -------
 //Options can be overwriten in defines.h file
 #ifndef TM_SPI2_PRESCALER
-#define TM_SPI2_PRESCALER	SPI_BaudRatePrescaler_32
+#define TM_SPI2_PRESCALER	SPI_BaudRatePrescaler_128
 #endif
 //Specify datasize
 #ifndef TM_SPI2_DATASIZE
@@ -256,7 +256,7 @@ typedef enum {
 #endif
 //Mode, master or slave
 #ifndef TM_SPI2_MASTERSLAVE
-#define TM_SPI2_MASTERSLAVE SPI_Mode_Master
+#define TM_SPI2_MASTERSLAVE     SPI_Mode_Master
 #endif
 //Specify mode of operation, clock polarity and clock phase
 #ifndef TM_SPI2_MODE
